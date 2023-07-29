@@ -1,10 +1,10 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import Lock from "@/app/components/icon/lock";
-import User from "@/app/components/icon/user";
-import Send from "@/app/components/icon/send";
-import ArrowSmallDown from "@/app/components/icon/arrowSmallDown";
+import Lock from "./components/icon/lock";
+import User from "./components/icon/user";
+import Send from "./components/icon/send";
 import Eye from "./components/icon/eye";
+import ArrowSmallDown from "./components/icon/arrowSmallDown";
 import EyeSlash from "./components/icon/eyeSlash";
 
 const Home = () => {
@@ -14,14 +14,15 @@ const Home = () => {
   const shouldFollowLastMessageRef = useRef(true);
   const [inputName, setInputName] = useState("");
   const [inputKey, setInputKey] = useState("");
+  const [inputMessage, setInputMessage] = useState("");
   const [show, setShow] = useState(false);
   const [isEmptyName, setIsEmptyName] = useState(false);
+  const [isEmptyKey, setIsEmptyKey] = useState(false);
+  const [isEmptyMessage, setIsEmptyMessage] = useState(false);
 
   useEffect(() => {
     const storedName = localStorage.getItem("userName");
     const storedKey = localStorage.getItem("secretKey");
-    console.log(storedName);
-    console.log(storedKey);
     if (storedName) {
       setInputName(storedName);
     }
@@ -73,6 +74,10 @@ const Home = () => {
     setInputKey(event.target.value.substring(0, 10));
   };
 
+  const handleChangeMessage = (event) => {
+    setInputMessage(event.target.value);
+  };
+
   const handleSaveName = () => {
     localStorage.setItem("userName", inputName);
   };
@@ -82,12 +87,23 @@ const Home = () => {
   };
 
   const handleSend = () => {
-    if (inputName == "" || null) {
+    if (inputName.trim() == "" || null) {
       setIsEmptyName(true);
-      console.log(isEmptyName);
       setTimeout(() => setIsEmptyName(false), 3000);
       return;
     }
+    if (inputKey.trim() == "" || null) {
+      setIsEmptyKey(true);
+      setTimeout(() => setIsEmptyKey(false), 3000);
+      return;
+    }
+    if (inputMessage.trim() == "") {
+      setIsEmptyMessage(true);
+      setTimeout(() => setIsEmptyMessage(false), 3000);
+      return;
+    }
+    alert(`${inputName} ${inputKey} ${inputMessage}`);
+    setInputMessage("");
   };
 
   return (
@@ -105,9 +121,31 @@ const Home = () => {
       >
         <div className="min-h-full w-[800px] h-fit flex flex-col justify-end">
           {Array.from({ length: num }).map((item, index) => (
-            <div key={index} className="chat chat-start">
-              <div className="chat-bubble">
-                It's over Anakin, I have the high ground {index}.
+            <div key={index} className="chat chat-start items-end">
+              <div class="avatar placeholder">
+                <div class="bg-neutral-focus text-neutral-content rounded-full w-10">
+                  <span class="">
+                    {inputName.split(" ").length > 1
+                      ? inputName
+                          .split(" ")
+                          .slice(0, 2)
+                          .map((item) => item.charAt(0))
+                          .join("")
+                          .toUpperCase()
+                      : inputName.substring(0, 2).toUpperCase()}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="chat-bubble">
+                  It's over Anakin, I have the high ground {index}.
+                  <div className="text-right">
+                    <time class="text-xs opacity-50">2 hours ago</time>
+                  </div>
+                </div>
+                <button className="btn btn-circle btn-ghost">
+                  <Lock />
+                </button>
               </div>
             </div>
           ))}
@@ -116,7 +154,9 @@ const Home = () => {
       <div className="w-full flex justify-center">
         <div className="w-[800px] py-3 flex items-center gap-1">
           <div
-            class={isEmptyName ? "tooltip tooltip-secondary tooltip-open" : ""}
+            className={
+              isEmptyName ? "tooltip tooltip-secondary tooltip-open" : ""
+            }
             data-tip="Whooo are you!"
           >
             <button
@@ -126,16 +166,33 @@ const Home = () => {
               <User />
             </button>
           </div>
-          <button
-            className="btn btn-square btn-ghost"
-            onClick={() => window.key_modal.showModal()}
+          <div
+            className={
+              isEmptyKey ? "tooltip tooltip-secondary tooltip-open" : ""
+            }
+            data-tip="What's your secrect key!"
           >
-            <Lock />
-          </button>
-          <input
-            className="input focus:outline-0 text-lg w-full bg-[#A6ADBA] bg-opacity-20"
-            placeholder="your secrect..."
-          />
+            <button
+              className="btn btn-square btn-ghost"
+              onClick={() => window.key_modal.showModal()}
+            >
+              <Lock />
+            </button>
+          </div>
+          <div
+            className={`w-full ${
+              isEmptyMessage && "tooltip tooltip-secondary tooltip-open"
+            }`}
+            data-tip="What's message you want to send!"
+          >
+            <input
+              className="input focus:outline-0 text-lg w-full bg-[#A6ADBA] bg-opacity-20"
+              placeholder="your secrect..."
+              value={inputMessage}
+              onChange={handleChangeMessage}
+            />
+          </div>
+
           <button className="btn btn-square btn-ghost" onClick={handleSend}>
             <Send />
           </button>
@@ -167,6 +224,9 @@ const Home = () => {
             </button>
           </form>
         </div>
+        <form method="dialog" class="modal-backdrop">
+          <button />
+        </form>
       </dialog>
       <dialog id="key_modal" className="modal">
         <div className="modal-box flex flex-col gap-5">
@@ -197,6 +257,9 @@ const Home = () => {
             </button>
           </form>
         </div>
+        <form method="dialog" class="modal-backdrop">
+          <button />
+        </form>
       </dialog>
     </div>
   );
