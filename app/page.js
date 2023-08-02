@@ -211,8 +211,8 @@ const Home = () => {
   };
 
   const handleMessageChange = (event) => {
-    setInputMessage(event.target.value.substring(0, 300));
-    if (inputMessage.length == 300) {
+    setInputMessage(event.target.value.substring(0, 500));
+    if (inputMessage.length == 500) {
       setIsMessageOVer(true);
       setTimeout(() => setIsMessageOVer(false), 3000);
     }
@@ -380,7 +380,7 @@ const Home = () => {
               className={`w-full ${
                 isMessageOver && "tooltip tooltip-secondary tooltip-open"
               }`}
-              data-tip="Your message is over 300 characters!"
+              data-tip="Your message is over 500 characters!"
             >
               <input
                 className="input focus:outline-0 text-lg w-full bg-[#A6ADBA] bg-opacity-20"
