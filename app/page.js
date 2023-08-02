@@ -15,7 +15,7 @@ import User from "./components/icon/user";
 import Send from "./components/icon/send";
 import ArrowSmallDown from "./components/icon/arrowSmallDown";
 import Key from "./components/icon/key";
-import { decrypt, encrypt, generateKeys } from "./rsa";
+import { generateKeys } from "./rsa";
 import ArrowUpDown from "./components/icon/arrowUpDown";
 import Clipboard from "./components/icon/clipboard";
 import UnLock from "./components/icon/unLock";
@@ -259,11 +259,27 @@ const Home = () => {
     }
 
     SetIsSendLoading(true);
-
     const keys = generateKeys();
-    const encryptedMessage = encrypt(inputMessage, keys.publicKey);
 
     try {
+      const encryptedMessage = await new Promise((resolve, reject) => {
+        const worker = new Worker("/encryptionWorker.js");
+
+        worker.onmessage = function (e) {
+          const encryptedResult = e.data;
+          resolve(encryptedResult);
+        };
+
+        worker.onerror = function (error) {
+          reject(error);
+        };
+
+        worker.postMessage({
+          message: inputMessage,
+          publicKey: keys.publicKey,
+        });
+      });
+
       await addDoc(collection(db, "messages"), {
         message: encryptedMessage,
         n: keys.publicKey.N,
@@ -288,18 +304,21 @@ const Home = () => {
     }
 
     setIsLoading(true);
+    const worker = new Worker("/decryptionWorker.js");
 
-    try {
-      const result = decrypt(currentMessage.message, {
+    worker.onmessage = function (e) {
+      const decryptedMessage = e.data;
+      setMessage(decryptedMessage);
+      setIsLoading(false);
+    };
+
+    worker.postMessage({
+      encryptedMessage: currentMessage.message,
+      privateKey: {
         N: currentMessage.n,
         d: inputUnlock,
-      });
-      setMessage(result);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-    }
+      },
+    });
   };
 
   return (
@@ -371,9 +390,15 @@ const Home = () => {
               />
             </div>
           </div>
-          <button className="btn btn-square btn-ghost" onClick={handleSend}>
-            <Send />
-          </button>
+          {isSendLoading ? (
+            <button className="btn btn-square btn-ghost btn-disabled">
+              <span className="loading loading-dots loading-sm" />
+            </button>
+          ) : (
+            <button className="btn btn-square btn-ghost" onClick={handleSend}>
+              <Send />
+            </button>
+          )}
         </div>
       </div>
       {showScrollButton && (
@@ -397,13 +422,9 @@ const Home = () => {
             <p className="text-sm">{inputName.length}/16</p>
           </div>
           <form method="dialog" className="modal-action m-0">
-            {isSendLoading ? (
-              <span className="loading loading-dots loading-sm" />
-            ) : (
-              <button className="btn btn-ghost" onClick={handleSaveName}>
-                Save
-              </button>
-            )}
+            <button className="btn btn-ghost" onClick={handleSaveName}>
+              Save
+            </button>
           </form>
         </div>
         <form method="dialog" className="modal-backdrop">

@@ -62,25 +62,27 @@ const generateKeys = () => {
   };
 };
 
+export { generateKeys };
+
 // Function to encrypt a message using RSA public key
-const encrypt = (message, publicKey) => {
-  const { N, e } = publicKey;
-  const encryptedMessage = message.split("").map((char) => char.charCodeAt(0));
-  const encryptedResult = encryptedMessage.map(
-    (charCode) => BigInt(charCode) ** BigInt(e) % BigInt(N)
-  );
-  return encryptedResult.join(" ");
-};
+// const encrypt = (message, publicKey) => {
+//   const { N, e } = publicKey;
+//   const encryptedMessage = message.split("").map((char) => char.charCodeAt(0));
+//   const encryptedResult = encryptedMessage.map(
+//     (charCode) => BigInt(charCode) ** BigInt(e) % BigInt(N)
+//   );
+//   return encryptedResult.join(" ");
+// };
 
 // Function to decrypt a message using RSA private key
-const decrypt = (encryptedMessage, privateKey) => {
-  const { N, d } = privateKey;
-  const decryptedMessage = encryptedMessage
-    .split(" ")
-    .map((encryptedChar) => BigInt(encryptedChar) ** BigInt(d) % BigInt(N));
-  return decryptedMessage
-    .map((charCode) => String.fromCharCode(Number(charCode)))
-    .join("");
-};
+// const decrypt = (encryptedMessage, privateKey) => {
+//   const { N, d } = privateKey;
+//   const decryptedMessage = encryptedMessage
+//     .split(" ")
+//     .map((encryptedChar) => BigInt(encryptedChar) ** BigInt(d) % BigInt(N));
+//   return decryptedMessage
+//     .map((charCode) => String.fromCharCode(Number(charCode)))
+//     .join("");
+// };
 
-export { generateKeys, encrypt, decrypt };
+// export { generateKeys, encrypt, decrypt };
